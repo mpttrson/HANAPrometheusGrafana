@@ -23,3 +23,7 @@ Prometheus metrics and Grafana samples dashboards for SAP HANA
 
 [Monitor PCM with Prometheus and Grafana](https://stevescargall.com/2021/09/16/how-to-monitor-persistent-memory-performance-on-linux-using-pcm-prometheus-and-grafana/)
 
+## Examples
+
+[Sample SUSE HANA Dashboard](https://grafana.com/grafana/dashboards/12758)
+
