@@ -1,0 +1,417 @@
+{
+  "SELECT /* DEBUG Q1 Memory overview*/ host, ROUND((used_physical_memory + free_physical_memory) / 1024 / 1024, 2) host_physical_mem, ROUND(used_physical_memory / 1024 / 1024, 2) host_resident_mem, ROUND(free_physical_memory / 1024 / 1024, 2) host_free_physical_mem, ROUND(free_swap_space / 1024 / 1024, 2) host_free_swap, ROUND(used_swap_space / 1024 / 1024, 2) host_used_swap, ROUND(allocation_limit / 1024 / 1024, 2) host_alloc_limit, ROUND(instance_total_memory_used_size / 1024 / 1024, 2) host_total_used_mem, ROUND(instance_total_memory_peak_used_size / 1024 / 1024, 2) host_total_peak_used_mem, ROUND(instance_total_memory_allocated_size / 1024 / 1024, 2) host_total_alloc_mem, ROUND(instance_code_size / 1024 / 1024, 2) host_code_size, ROUND(instance_shared_memory_allocated_size / 1024 / 1024, 2) host_shr_mem_alloc,ROUND(persistent_memory_mapped_size / 1024 / 1024,2) host_pmem_mapped ,ROUND(persistent_memory_file_size / 1024 / 1024,2) host_pmem_file FROM sys.m_host_resource_utilization;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_host_memory_physical_total",
+        "description": "Total physical memory per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_PHYSICAL_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_resident",
+        "description": "Total resident (used physical) memory per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_RESIDENT_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_physical_free",
+        "description": "Free physical memory per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_FREE_PHYSICAL_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_swap_free",
+        "description": "Free swap memory per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_FREE_SWAP",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_swap_used",
+        "description": "Used swap memory per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_USED_SWAP",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_alloc_limit",
+        "description": "Memory allocation limit for all process per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_ALLOC_LIMIT",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_used_total",
+        "description": "Amount of memory from the memory pool that is currently being used by SAP HANA processes per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_TOTAL_USED_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_used_peak",
+        "description": "Peak memory from the memory pool used by SAP HANA processes since the instance started (this is a sample-based value) per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_TOTAL_PEAK_USED_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_pool_size",
+        "description": "Size of the memory pool for all SAP HANA processes per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_TOTAL_ALLOC_MEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_code_size",
+        "description": "Code size, including shared libraries of SAP HANA processes per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_CODE_SIZE",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_memory_shared_alloc",
+        "description": "Shared memory size of SAP HANA processes per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_SHR_MEM_ALLOC",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_pmem_mapped_mb",
+        "description": "Persistent memory mapped per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_PMEM_MAPPED",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_pmem_file_mb",
+        "description": "Persistent Memory File Size per host in MB",
+        "labels": ["HOST"],
+        "value": "HOST_PMEM_FILE",
+        "unit": "mb",
+        "type": "gauge"
+      }
+    ]
+  },
+   "SELECT /* DEBUG Q2 PMEM Tables by Numa Node*/ host,numa_node,schema_name,table_name,part_id,mb_used/1024/1024 mb_used,ranking from (select host,numa_node,schema_name,table_name,part_id,mb_used,rank() over(partition by numa_node order by mb_used desc ) as ranking from (SELECT tables.host,cast(file.numa_node_index as char(2)) numa_node,tables.schema_name schema_name,tables.table_name table_name,cast(tables.part_id as char(2)) part_id,sum(FILE.size) mb_used FROM SYS.M_PERSISTENT_MEMORY_VOLUME_DATA_FILES file JOIN SYS.M_TABLE_PERSISTENT_MEMORY_FILES tables ON file.file_name = tables.file_name JOIN SYS.M_SERVICES services ON file.host = services.host AND file.port = services.port AND services.service_name = 'indexserver' AND tables.column_fragment_type = 'SINGLE MAIN' GROUP BY tables.host,file.numa_node_index,tables.schema_name ,tables.table_name ,tables.part_id) detail) ranked where ranked.ranking <= 20 order by host,numa_node ,ranking asc,schema_name,table_name;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_numa_tables",
+        "description": "Show PMEM tables by NUMA node",
+        "labels": ["HOST","NUMA_NODE","SCHEMA_NAME","TABLE_NAME","PART_ID"],
+        "value": "MB_USED",
+        "unit": "mb",
+        "type": "gauge"
+      }
+    ]
+  },
+  "SELECT /* DEBUG Q3 Numa Node PMEM usage*/ file.host ,cast(file.numa_node_index as char(2)) numa_node , round(file.total_size/1024/1024,0) total_size, round(file.used_size/1024/1024) used_size, round((file.used_size  / file.total_size ) * 100,2) as used_percent FROM M_PERSISTENT_MEMORY_VOLUMES file JOIN SYS.M_SERVICES services ON file.host = services.host AND file.port = services.port AND services.service_name = 'indexserver';":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_numa_usage_total",
+        "description": "Show total PMEM available by NUMA node",
+        "labels": ["HOST","NUMA_NODE"],
+        "value": "TOTAL_SIZE",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_numa_usage",
+        "description": "Show total PMEM usage by NUMA node",
+        "labels": ["HOST","NUMA_NODE"],
+        "value": "USED_SIZE",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_numa_usage",
+        "description": "Show percent PMEM usage by NUMA node",
+        "labels": ["HOST","NUMA_NODE"],
+        "value": "USED_PERCENT",
+        "unit": "percent",
+        "type": "gauge"
+      }
+    ]
+  }
+  ,
+  "SELECT  /* DEBUG Q4 Usage by memory type*/ host,ROUND(SUM(memory_size_in_main/1024/1024)) cs_main,ROUND(SUM(memory_size_in_delta/1024/1024)) cs_delta ,ROUND(SUM(persistent_memory_size_in_total/1024/1024)) cs_pmem,ROUND(SUM(memory_size_in_total/1024/1024)) cs_dram, ROUND(SUM(memory_size_in_page_loadable_main/1024/1024)) cs_nse ,(round(SUM(memory_size_in_total/1024/1024) / (SUM(memory_size_in_total/1024/1024) + SUM(persistent_memory_size_in_total/1024/1024)),2)*100) dram_percent FROM m_cs_tables GROUP BY host;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_cs_main",
+        "description": "Show column store main",
+        "labels": ["HOST"],
+        "value": "CS_MAIN",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_cs_delta",
+        "description": "Show column store delta",
+        "labels": ["HOST"],
+        "value": "CS_DELTA",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_cs_pmem",
+        "description": "Show column store PMEM",
+        "labels": ["HOST"],
+        "value": "CS_PMEM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_cs_dram_total",
+        "description": "Show total column store DRAM",
+        "labels": ["HOST"],
+        "value": "CS_DRAM",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_cs_nse",
+        "description": "Show column store in NSE",
+        "labels": ["HOST"],
+        "value": "CS_NSE",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_cs_dram",
+        "description": "Show percent of CS in DRAM",
+        "labels": ["HOST"],
+        "value": "DRAM_PERCENT",
+        "unit": "percent",
+        "type": "gauge"
+      }
+    ]
+  },
+  "SELECT /* DEBUG Q5 Host info*/ host , key , value , 1 dummy FROM  sys.m_host_information WHERE key IN ('cpusockets','cpu_summary','os_name','hw_model','build_version','cpu_model');":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_system",
+        "description": "Show system info",
+        "labels": ["HOST","KEY","VALUE"],
+        "value": "DUMMY",
+        "unit": "text",
+        "type": "gauge"
+      }
+    ]
+  },
+  "SELECT /*DEBUG Q6 Host Info Pivot*/ host ,  max(MAP(KEY, 'cpu_sockets', value)) cpu_sockets,max(MAP(KEY, 'cpu_cores', value)) cpu_cores,max(MAP(KEY, 'cpu_summary', value)) cpu_summary,max(MAP(KEY, 'os_name', value)) os_name,max(MAP(KEY, 'hw_model', value)) hw_model,max(MAP(KEY, 'cpu_model', value)) cpu_model,max(MAP(KEY, 'build_version', value)) build_version,1 dummy FROM  sys.m_host_information WHERE key IN ('cpu_sockets','cpu_summary','os_name','hw_model','build_version','cpu_model','cpu_cores') GROUP BY host ;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_system_pivot",
+        "description": "Show system info Pivoted",
+        "labels": ["HOST","HW_MODEL","CPU_MODEL","CPU_SOCKETS","CPU_CORES","CPU_SUMMARY","OS_NAME","BUILD_VERSION"],
+        "value": "DUMMY",
+        "unit": "text",
+        "type": "gauge"
+      }
+    ]
+  },
+  "SELECT /* DEBUG Q7 Debug Recursive*/ host,SUBSTR_BEFORE(SUBSTR_AFTER(statement_string,'*'),'*') query,SUM(execution_count) executions,ROUND(SUM((total_cursor_duration/1024/1024)),2) total_secs,ROUND(AVG((avg_preparation_time/1024/1024)),2) prep_secs,SUM(total_result_record_count/execution_count) records,ROUND(MIN((min_cursor_duration/1024/1024)),2) min_cursor_secs, ROUND(AVG((avg_cursor_duration/1024/1024)),2) avg_cursor_secs,ROUND(MAX((max_cursor_duration/1024/1024)),2) max_cursor_secs , ROUND(MIN((min_execution_time/1024/1024)),2) min_exec_secs , ROUND(AVG((avg_execution_time/1024/1024)),2) avg_exec_secs ,ROUND(MAX((max_execution_time/1024/1024)),2) max_exec_secs ,ROUND(MIN((min_execution_fetch_time/1024/1024)),2) min_fetch_secs ,ROUND(AVG((avg_execution_fetch_time/1024/1024)),2) avg_fetch_secs , ROUND(MAX((max_execution_fetch_time/1024/1024)),2) max_fetch_secs,ROUND(MIN((min_execution_memory_size/1024/1024))) min_memory_mb ,ROUND(AVG((avg_execution_memory_size/1024/1024))) avg_memory_mb ,ROUND(MAX((max_execution_memory_size/1024/1024))) max_memory_mb ,ROUND(AVG((avg_service_network_request_duration/1024/1024))) avg_network_request ,ROUND(MAX((max_service_network_request_duration/1024/1024))) max_network_request FROM public.m_sql_plan_cache where execution_count > 0 AND is_valid = 'TRUE' AND statement_string like '% DEBUG Q%' GROUP BY host,SUBSTR_BEFORE(SUBSTR_AFTER(statement_string,'*'),'*') ORDER BY 1,9 DESC  ":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "debug_executions",
+        "description": "Show number of executions",
+        "labels": ["HOST","QUERY"],
+        "value": "EXECUTIONS",
+        "unit": "count",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_total",
+        "description": "Show total runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "TOTAL_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_prep",
+        "description": "Show prep time",
+        "labels": ["HOST","QUERY"],
+        "value": "PREP_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_records",
+        "description": "Show total records",
+        "labels": ["HOST","QUERY"],
+        "value": "RECORDS",
+        "unit": "count",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_min_cursor",
+        "description": "Show Minimum cursor runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "MIN_CURSOR_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_avg_cursor",
+        "description": "Show Average cursor runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "AVG_CURSOR_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      }, {
+        "name": "debug_max_cursor",
+        "description": "Show Max cursor runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "MAX_CURSOR_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_avg_exec",
+        "description": "Show execution runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "AVG_EXEC_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_avg_fetch",
+        "description": "Show fetch runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "AVG_FETCH_SECS",
+        "unit": "secs",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_avg_memory",
+        "description": "Show memory used",
+        "labels": ["HOST","QUERY"],
+        "value": "AVG_MEMORY_MB",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "debug_avg_network_request",
+        "description": "Show network runtime",
+        "labels": ["HOST","QUERY"],
+        "value": "AVG_NETWORK_REQUEST",
+        "unit": "secs",
+        "type": "gauge"
+      }
+    ]
+  } ,
+  "select /* DEBUG Q8 Row Store*/ host,round(sum(used_fixed_part_size)/1024/1024,0) + round(sum(used_variable_part_size)/1024/1024,0) rs_dram from m_rs_tables group by host;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_rs_dram",
+        "description": "Show row store main",
+        "labels": ["HOST"],
+        "value": "RS_DRAM",
+        "unit": "mb",
+        "type": "gauge"
+      }
+    ]
+  } ,
+  "SELECT /* DEBUG Q9 Host Services History*/  h.host,h.CPU,h.MEMORY_USED/1024/1024 memory_used,h.DISK_USED/1024/1024 disk_used,s0.SYSTEM_CPU,s0.TRANSACTION_COUNT,s0.ACTIVE_THREAD_COUNT,s0.ACTIVE_SQL_EXECUTOR_COUNT FROM SYS.M_LOAD_HISTORY_HOST h full outer join SYS.M_LOAD_HISTORY_SERVICE s0 on h.time = s0.time and h.host = s0.host INNER JOIN SYS.M_SERVICES s1 ON s0.host = s1.host AND s0.port = s1.port AND s1.service_name = 'indexserver' AND h.time between add_seconds(current_timestamp  ,-10) and current_timestamp;":
+  {
+    "enabled": true,
+    "hana_version_range": ["1.0.0", "3.0.0"],
+    "metrics": [
+      {
+        "name": "pmem_host_services_history_cpu",
+        "description": "Show CPU usage",
+        "labels": ["HOST"],
+        "value": "CPU",
+        "unit": "percent",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_memory",
+        "description": "Show memory usage",
+        "labels": ["HOST"],
+        "value": "MEMORY_USED",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_disk",
+        "description": "Show disk usage",
+        "labels": ["HOST"],
+        "value": "DISK_USED",
+        "unit": "mb",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_system_cpu",
+        "description": "Show system cpu usage",
+        "labels": ["HOST"],
+        "value": "SYSTEM_CPU",
+        "unit": "percent",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_transactions",
+        "description": "Show active transactions",
+        "labels": ["HOST"],
+        "value": "TRANSACTION_COUNT",
+        "unit": "count",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_threads",
+        "description": "Show active threads",
+        "labels": ["HOST"],
+        "value": "ACTIVE_THREAD_COUNT",
+        "unit": "count",
+        "type": "gauge"
+      },
+      {
+        "name": "pmem_host_services_history_sql_executions",
+        "description": "Show SQL executions",
+        "labels": ["HOST"],
+        "value": "ACTIVE_SQL_EXECUTOR_COUNT",
+        "unit": "count",
+        "type": "gauge"
+      }
+    ]
+  }
+}
