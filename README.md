@@ -19,3 +19,7 @@ Prometheus metrics and Grafana samples dashboards for SAP HANA
 
 ## How to guides
 
+[Setup Prometheus and Grafana](https://stevescargall.com/2020/05/13/how-to-install-prometheus-and-grafana-on-fedora-server/)
+
+[Monitor PCM with Prometheus and Grafana](https://stevescargall.com/2021/09/16/how-to-monitor-persistent-memory-performance-on-linux-using-pcm-prometheus-and-grafana/)
+
