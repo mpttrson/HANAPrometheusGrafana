@@ -3,9 +3,9 @@
   "multi_tenant": true,
   "timeout": 30,
   "hana": {
-    "host": "172.30.3.123",
+    "host": "localhost",
     "port": 30013,
-    "user": "prom_user",
+    "user": "user",
     "password": "NeverGonnaGiveYouUp"
   },
   "logging": {
