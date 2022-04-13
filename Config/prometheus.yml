@@ -26,7 +26,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ["172.30.3.123:9090"]
+      - targets: ["localhost:9090"]
 
   - job_name: "PCM"
 
@@ -34,7 +34,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ["172.30.3.123:9738"]
+      - targets: ["localhost:9738"]
       
   - job_name: "HANA"
 
@@ -42,7 +42,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ["172.30.3.123:9668"]
+      - targets: ["localhost:9668"]
 
   - job_name: "SUSE"
 
@@ -50,5 +50,5 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-      - targets: ["172.30.3.123:9669"]
+      - targets: ["localhost:9669"]
       
