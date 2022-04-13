@@ -1,0 +1,15 @@
+{
+  "exposition_port": 9668,
+  "multi_tenant": true,
+  "timeout": 30,
+  "hana": {
+    "host": "172.30.3.123",
+    "port": 30013,
+    "user": "prom_user",
+    "password": "NeverGonnaGiveYouUp"
+  },
+  "logging": {
+    "config_file": "/etc/hanadb_exporter/logging_config.ini",
+    "log_file": "/etc/hanadb_exporter/hanadb_exporter.log"
+  }
+}
